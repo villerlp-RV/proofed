@@ -1,0 +1,18 @@
+{
+  "name": "MenuOption",
+  "type": "object",
+  "properties": {
+    "bakery_id": { "type": "string" },
+    "group": { "type": "string", "enum": ["flavor", "filling", "frosting"] },
+    "name": { "type": "string" },
+    "upcharge_cents": { "type": "number", "default": 0 },
+    "active": { "type": "boolean", "default": true }
+  },
+  "required": ["bakery_id", "group", "name"],
+  "rls": {
+    "read": { "created_by_id": "{{user.id}}" },
+    "create": { "created_by_id": "{{user.id}}" },
+    "update": { "created_by_id": "{{user.id}}" },
+    "delete": { "created_by_id": "{{user.id}}" }
+  }
+}

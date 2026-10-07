@@ -1,0 +1,17 @@
+{
+  "name": "BlockedDate",
+  "type": "object",
+  "properties": {
+    "bakery_id": { "type": "string" },
+    "date": { "type": "string", "description": "YYYY-MM-DD" },
+    "end_date": { "type": "string", "description": "YYYY-MM-DD, optional, for a range" },
+    "reason": { "type": "string" }
+  },
+  "required": ["bakery_id", "date"],
+  "rls": {
+    "read": { "created_by_id": "{{user.id}}" },
+    "create": { "created_by_id": "{{user.id}}" },
+    "update": { "created_by_id": "{{user.id}}" },
+    "delete": { "created_by_id": "{{user.id}}" }
+  }
+}

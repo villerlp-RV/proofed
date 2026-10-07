@@ -1,0 +1,21 @@
+{
+  "name": "Payment",
+  "type": "object",
+  // Amount still owed on an order = total_cents minus the sum of its payments.
+  "properties": {
+    "bakery_id": { "type": "string" },
+    "order_id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["deposit", "balance", "tip", "refund"] },
+    "cents": { "type": "number", "description": "Refunds are negative" },
+    "method": { "type": "string", "enum": ["venmo", "cashapp", "zelle", "paypal", "cash", "card", "other"] },
+    "received_on": { "type": "string", "description": "YYYY-MM-DD" },
+    "note": { "type": "string" }
+  },
+  "required": ["bakery_id", "order_id", "kind", "cents"],
+  "rls": {
+    "read": { "created_by_id": "{{user.id}}" },
+    "create": { "created_by_id": "{{user.id}}" },
+    "update": { "created_by_id": "{{user.id}}" },
+    "delete": { "created_by_id": "{{user.id}}" }
+  }
+}

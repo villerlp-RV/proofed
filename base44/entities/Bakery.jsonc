@@ -1,0 +1,36 @@
+{
+  "name": "Bakery",
+  "type": "object",
+  // One per baker. Customers never read this directly; the publicShop function
+  // hands the order form a trimmed copy (no address, no capacity numbers).
+  "properties": {
+    "name": { "type": "string" },
+    "slug": { "type": "string", "description": "The public link: /b/<slug>. Lowercase letters, digits and dashes." },
+    "accepting_orders": { "type": "boolean", "default": true },
+    "weekly_capacity": { "type": "number", "default": 4, "description": "Spots per Monday–Sunday week" },
+    "daily_capacity": { "type": "number", "default": 2, "description": "Spots per pickup day" },
+    "lead_days": { "type": "number", "default": 7, "description": "Minimum days of notice" },
+    "deposit_percent": { "type": "number", "default": 50 },
+    "quote_hold_hours": { "type": "number", "default": 48 },
+    "pickup_address": { "type": "string", "description": "Shown to the customer only once their order is booked" },
+    "payment_handles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": { "type": "string", "enum": ["venmo", "cashapp", "zelle", "paypal", "other"] },
+          "handle": { "type": "string" }
+        }
+      }
+    },
+    "policies": { "type": "string", "description": "Allergens, cancellations, anything customers should read first" },
+    "timezone": { "type": "string", "default": "America/Chicago" }
+  },
+  "required": ["name", "slug"],
+  "rls": {
+    "read": { "created_by_id": "{{user.id}}" },
+    "create": { "created_by_id": "{{user.id}}" },
+    "update": { "created_by_id": "{{user.id}}" },
+    "delete": { "created_by_id": "{{user.id}}" }
+  }
+}

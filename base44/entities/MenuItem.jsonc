@@ -1,0 +1,32 @@
+{
+  "name": "MenuItem",
+  "type": "object",
+  "properties": {
+    "bakery_id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["cake", "cupcakes", "cookies", "other"], "default": "cake" },
+    "name": { "type": "string" },
+    "sizes": {
+      "type": "array",
+      "description": "spots = how much of the day/week limit one of these uses (a 2-tier cake might be 2)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "serves": { "type": "number" },
+          "base_cents": { "type": "number" },
+          "spots": { "type": "number", "default": 1 }
+        }
+      }
+    },
+    "option_groups": { "type": "array", "items": { "type": "string", "enum": ["flavor", "filling", "frosting"] } },
+    "active": { "type": "boolean", "default": true },
+    "sort": { "type": "number", "default": 0 }
+  },
+  "required": ["bakery_id", "name"],
+  "rls": {
+    "read": { "created_by_id": "{{user.id}}" },
+    "create": { "created_by_id": "{{user.id}}" },
+    "update": { "created_by_id": "{{user.id}}" },
+    "delete": { "created_by_id": "{{user.id}}" }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "Order",
+  "type": "object",
+  // Customers create orders through the publicShop function (service role), so
+  // created_by_id isn't the baker. owner_id is set to the baker's user id instead.
+  "properties": {
+    "bakery_id": { "type": "string" },
+    "owner_id": { "type": "string", "description": "User id of the baker who owns the bakery" },
+    "status": {
+      "type": "string",
+      "enum": ["requested", "quoted", "booked", "ready", "picked_up", "declined", "expired", "cancelled"],
+      "default": "requested"
+    },
+    "customer": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "instagram": { "type": "string" }
+      }
+    },
+    "pickup_date": { "type": "string", "description": "YYYY-MM-DD" },
+    "pickup_time": { "type": "string", "description": "HH:mm" },
+    "bake_date": { "type": "string", "description": "YYYY-MM-DD" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "menu_item_id": { "type": "string" },
+          "name": { "type": "string" },
+          "size_label": { "type": "string" },
+          "options": { "type": "array", "items": { "type": "string" } },
+          "qty": { "type": "number", "default": 1 },
+          "design_notes": { "type": "string" }
+        }
+      }
+    },
+    "photo_urls": { "type": "array", "items": { "type": "string" } },
+    "spots": { "type": "number", "default": 1 },
+    "quote_lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "label": { "type": "string" }, "cents": { "type": "number" } }
+      }
+    },
+    "total_cents": { "type": "number" },
+    "deposit_cents": { "type": "number" },
+    "quote_message": { "type": "string" },
+    "quote_expires_at": { "type": "string", "format": "date-time" },
+    "customer_says_paid": { "type": "boolean", "default": false },
+    "public_token": { "type": "string", "description": "Random secret for the customer's status link" },
+    "private_notes": { "type": "string" },
+    "source": { "type": "string", "enum": ["link", "manual"], "default": "link" }
+  },
+  "required": ["bakery_id", "owner_id", "status", "pickup_date"],
+  "rls": {
+    "read": { "data.owner_id": "{{user.id}}" },
+    "create": { "data.owner_id": "{{user.id}}" },
+    "update": { "data.owner_id": "{{user.id}}" },
+    "delete": { "data.owner_id": "{{user.id}}" }
+  }
+}

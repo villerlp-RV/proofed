@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 245 243 246;
+    --surface: 255 255 255;
+    --ink: 36 28 39;
+    --muted: 108 99 114;
+    --line: 226 220 229;
+    --accent: 176 32 90;
+    --accent-ink: 255 255 255;
+    --accent-soft: 249 226 236;
+    --ok: 43 122 87;
+    --ok-soft: 223 241 231;
+    --warn: 156 92 20;
+    --warn-soft: 251 236 216;
+    --hatch: 233 228 236;
+    color-scheme: light;
+  }
+  .dark {
+    --bg: 21 17 24;
+    --surface: 32 26 36;
+    --ink: 241 236 243;
+    --muted: 169 159 175;
+    --line: 53 44 58;
+    --accent: 242 112 159;
+    --accent-ink: 27 15 21;
+    --accent-soft: 59 29 43;
+    --ok: 109 200 157;
+    --ok-soft: 24 48 38;
+    --warn: 231 166 91;
+    --warn-soft: 56 40 21;
+    --hatch: 42 35 48;
+    color-scheme: dark;
+  }
+  html, body { background: rgb(var(--bg)); color: rgb(var(--ink)); }
+  body { @apply font-sans antialiased; -webkit-tap-highlight-color: transparent; }
+  h1, h2, h3 { @apply font-display; text-wrap: balance; }
+  :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+}
+
+@layer components {
+  .card { @apply bg-surface border border-line rounded-2xl p-4; }
+  .lbl { @apply text-[11px] uppercase tracking-[0.1em] font-bold text-muted; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold text-[15px] bg-accent text-accent-ink active:scale-[0.98] transition disabled:opacity-50; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold text-[15px] border-2 border-accent text-accent active:scale-[0.98] transition disabled:opacity-50; }
+  .btn-quiet { @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 font-semibold text-accent; }
+  .input { @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/70; }
+  .chip { @apply inline-block rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap; }
+  .hatched { background: repeating-linear-gradient(45deg, rgb(var(--hatch)) 0 4px, transparent 4px 8px); }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
