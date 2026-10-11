@@ -24,7 +24,9 @@
       }
     },
     "policies": { "type": "string", "description": "Allergens, cancellations, anything customers should read first" },
-    "timezone": { "type": "string", "default": "America/Chicago" }
+    "timezone": { "type": "string", "default": "America/Chicago" },
+    "email_new_requests": { "type": "boolean", "default": true, "description": "Email the baker when a customer sends a request" },
+    "notify_email": { "type": "string", "description": "Where to send those emails; empty means the baker's sign-in email" }
   },
   "required": ["name", "slug"],
   "rls": {

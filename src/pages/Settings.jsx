@@ -29,6 +29,8 @@ export default function Settings() {
     pickup_address: bakery.pickup_address || "",
     policies: bakery.policies || "",
     timezone: bakery.timezone || "America/Chicago",
+    email_new_requests: bakery.email_new_requests !== false,
+    notify_email: bakery.notify_email || "",
     payment_handles: bakery.payment_handles?.length ? bakery.payment_handles : [{ method: "venmo", handle: "" }],
   }));
   const [status, setStatus] = useState("");
@@ -57,6 +59,8 @@ export default function Settings() {
         pickup_address: form.pickup_address.trim(),
         policies: form.policies.trim(),
         timezone: form.timezone,
+        email_new_requests: form.email_new_requests,
+        notify_email: form.notify_email.trim(),
         payment_handles: form.payment_handles.filter((h) => h.handle.trim()).map((h) => ({ method: h.method, handle: h.handle.trim() })),
       });
       await refresh("bakery");
@@ -116,6 +120,15 @@ export default function Settings() {
           <span><b>Taking orders</b><br /><span className="text-sm text-muted">Off shows customers a “closed for now” message</span></span>
           <input id="s-accepting" type="checkbox" className="w-6 h-6 accent-[rgb(var(--accent))]" checked={form.accepting_orders} onChange={(e) => set({ accepting_orders: e.target.checked })} />
         </label>
+        <label className="flex justify-between items-center gap-3">
+          <span><b>Email me new requests</b><br /><span className="text-sm text-muted">One email each time a customer sends the form</span></span>
+          <input id="s-email-requests" type="checkbox" className="w-6 h-6 accent-[rgb(var(--accent))]" checked={form.email_new_requests} onChange={(e) => set({ email_new_requests: e.target.checked })} />
+        </label>
+        {form.email_new_requests && (
+          <Field label="Send them to" hint="Leave empty to use the email you sign in with.">
+            <input id="s-notify-email" type="email" className="input" placeholder={user?.email || "you@example.com"} value={form.notify_email} onChange={(e) => set({ notify_email: e.target.value })} />
+          </Field>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Spots per week" hint="Mon–Sun"><input id="s-weekly" className="input" inputMode="numeric" value={form.weekly_capacity} onChange={(e) => set({ weekly_capacity: e.target.value })} /></Field>
           <Field label="Spots per day"><input id="s-daily" className="input" inputMode="numeric" value={form.daily_capacity} onChange={(e) => set({ daily_capacity: e.target.value })} /></Field>
