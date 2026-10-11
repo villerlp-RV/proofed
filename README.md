@@ -36,6 +36,7 @@ npm run build
 | Capacity, dates, expiry rules | `src/lib/rules.js` (the function keeps a copy; `rules.test.js` checks they match) |
 | Baker screens | `src/pages/`: Today, Requests, OrderDetail, Calendar, Earnings, Settings, Menu, Setup |
 | Customer pages | `src/pages/public/`: ShopForm (`/b/:slug`), OrderStatus (`/o/:token`) |
+| Admin page | `src/pages/Admin.jsx` (`/admin`) and `base44/functions/adminOverview/entry.ts`: every shop and order, for users with the Base44 **admin** role |
 
 **Spots, not cakes.** Each menu size uses a number of spots (a 2-tier cake might be 2). The daily and weekly limits are in spots. Quoted, booked and ready orders use spots; new requests don't. A quote holds its spots until `quote_expires_at`, then counts as expired automatically.
 
