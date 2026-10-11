@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { queryClientInstance } from "@/lib/query-client";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
@@ -14,6 +14,7 @@ const Earnings = lazy(() => import("./pages/Earnings"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Menu = lazy(() => import("./pages/Menu"));
 const Setup = lazy(() => import("./pages/Setup"));
+const Admin = lazy(() => import("./pages/Admin"));
 const ShopForm = lazy(() => import("./pages/public/ShopForm"));
 const OrderStatus = lazy(() => import("./pages/public/OrderStatus"));
 
@@ -21,12 +22,15 @@ const OrderStatus = lazy(() => import("./pages/public/OrderStatus"));
 function BakerApp() {
   const { isLoadingAuth, isLoadingPublicSettings, isAuthenticated, navigateToLogin } = useAuth();
   const bakery = useBakery({ enabled: isAuthenticated });
+  const { pathname } = useLocation();
 
   if (isLoadingAuth || isLoadingPublicSettings) return <Spinner />;
   if (!isAuthenticated) {
     navigateToLogin();
     return null;
   }
+  // Admins don't need a shop of their own; the function checks the role.
+  if (pathname.startsWith("/admin")) return <Admin />;
   if (bakery.isLoading) return <Spinner />;
   if (!bakery.data) return <Setup />;
 

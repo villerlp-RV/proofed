@@ -17,7 +17,7 @@ export default function Settings() {
   const { data: bakery } = useBakery();
   const blocked = useBlocked(bakery?.id);
   const refresh = useRefresh();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [form, setForm] = useState(() => ({
     name: bakery.name,
     accepting_orders: bakery.accepting_orders !== false,
@@ -181,6 +181,13 @@ export default function Settings() {
         <input id="b-reason" className="input" placeholder="Reason (only you see it)" value={range.reason} onChange={(e) => setRange({ ...range, reason: e.target.value })} />
         <button type="button" className="btn-ghost" disabled={!range.date} onClick={addRange}>Block these days</button>
       </section>
+
+      {user?.role === "admin" && (
+        <Link to="/admin" className="card flex justify-between items-center">
+          <span><b>Admin</b><br /><span className="text-sm text-muted">Every shop and order on Proofed</span></span>
+          <span className="text-accent font-bold">›</span>
+        </Link>
+      )}
 
       <button type="button" className="btn-quiet" onClick={() => logout()}>Sign out</button>
     </Screen>
