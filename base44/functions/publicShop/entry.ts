@@ -126,6 +126,45 @@ export function priceItems(formItems, menuItems, options) {
   return { items, lines, spots: Math.max(spots, 1) };
 }
 
+function niceDay(date) {
+  const d = new Date(date + 'T12:00:00Z');
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' });
+}
+
+function niceTime(time) {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(time || '');
+  if (!m) return '';
+  const h = Number(m[1]);
+  return `${h % 12 || 12}:${m[2]} ${h >= 12 ? 'pm' : 'am'}`;
+}
+
+// Plain-text email to the baker about a new request.
+export function requestEmail({ bakery, customer, date, time, items, photoCount, link }) {
+  const when = niceDay(date) + (niceTime(time) ? ` around ${niceTime(time)}` : '');
+  const what = items.map((i) => {
+    const head = [i.qty > 1 ? `${i.qty} ×` : '', i.size_label, i.name].filter(Boolean).join(' ');
+    const opts = i.options?.length ? ` (${i.options.join(' / ')})` : '';
+    const notes = i.design_notes ? `\n    "${i.design_notes}"` : '';
+    return `  • ${head}${opts}${notes}`;
+  });
+  const contact = [customer.phone, customer.email].filter(Boolean).join(' · ');
+  const lines = [
+    `${customer.name} sent ${bakery.name} a new request for pickup ${when}.`,
+    '',
+    'What they want:',
+    ...what,
+    '',
+    `Contact: ${contact}`,
+  ];
+  if (photoCount) lines.push(`Inspiration photos: ${photoCount} attached in the app`);
+  lines.push('', link ? `Open it and send a quote: ${link}` : 'Open Proofed to send a quote.');
+  lines.push('', 'Turn these emails off in Proofed → Shop settings.');
+  return {
+    subject: `New request: ${customer.name}, ${niceDay(date).replace(/^\w+, /, '')}`,
+    body: lines.join('\n'),
+  };
+}
+
 async function findBakery(db, slug) {
   const found = await db.Bakery.filter({ slug: clip(slug, 60).toLowerCase() });
   return found?.[0] || null;
@@ -248,7 +287,7 @@ export default async function(req) {
       }
 
       const public_token = randomToken();
-      await db.Order.create({
+      const created = await db.Order.create({
         bakery_id: bakery.id,
         owner_id: bakery.created_by_id,
         status: 'requested',
@@ -264,6 +303,25 @@ export default async function(req) {
         public_token,
         source: 'link',
       });
+
+      // The request is saved; a failed email must not fail the customer's submit.
+      if (bakery.email_new_requests !== false) {
+        try {
+          const owner = await db.User.get(bakery.created_by_id).catch(() => null);
+          const to = clip(bakery.notify_email, 120) || owner?.email;
+          if (to) {
+            const origin = req.headers.get('origin') || '';
+            const link = origin && created?.id ? `${origin}/orders/${created.id}` : '';
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to,
+              from_name: 'Proofed',
+              ...requestEmail({ bakery, customer: { name, phone, email }, date, time: clip(form.pickup_time, 5), items, photoCount: photo_urls.length, link }),
+            });
+          }
+        } catch (e) {
+          console.error('New-request email failed', e);
+        }
+      }
       return Response.json({ token: public_token, photos_saved: photo_urls.length, photos_sent: photos.length });
     }
 

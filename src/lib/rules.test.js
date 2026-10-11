@@ -85,3 +85,33 @@ describe("priceItems", () => {
     expect(fn.priceItems([{ menu_item_id: "x" }], menu, options).items).toEqual([]);
   });
 });
+
+describe("new-request email", () => {
+  it("lists what was ordered, how to reach the customer and where to quote", () => {
+    const { subject, body } = fn.requestEmail({
+      bakery: { name: "Test Bakery" },
+      customer: { name: "Maya R.", phone: "555-0100", email: "" },
+      date: "2026-10-20",
+      time: "12:10",
+      items: [{ name: "Round cake", size_label: '6"', qty: 1, options: ["Chocolate", "Strawberry"], design_notes: "Pink drip" }],
+      photoCount: 1,
+      link: "https://proofed.example/orders/abc",
+    });
+    expect(subject).toBe("New request: Maya R., Oct 20");
+    expect(body).toContain("Maya R. sent Test Bakery a new request for pickup Tuesday, Oct 20 around 12:10 pm.");
+    expect(body).toContain('  • 6" Round cake (Chocolate / Strawberry)\n    "Pink drip"');
+    expect(body).toContain("Contact: 555-0100");
+    expect(body).toContain("Inspiration photos: 1");
+    expect(body).toContain("Open it and send a quote: https://proofed.example/orders/abc");
+  });
+  it("still reads well with no time, photos or link", () => {
+    const { body } = fn.requestEmail({
+      bakery: { name: "B" }, customer: { name: "Sam", email: "sam@example.com" }, date: "2026-11-07", time: "",
+      items: [{ name: "Cupcakes", size_label: "1 dozen", qty: 2, options: [] }], photoCount: 0, link: "",
+    });
+    expect(body).toContain("pickup Saturday, Nov 7.");
+    expect(body).toContain("  • 2 × 1 dozen Cupcakes");
+    expect(body).not.toContain("Inspiration photos");
+    expect(body).toContain("Open Proofed to send a quote.");
+  });
+});
