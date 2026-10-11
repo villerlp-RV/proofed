@@ -128,8 +128,12 @@ describe("baker email lookup", () => {
     expect(await fn.bakerEmail(db, { created_by_id: "u1" })).toBe("baker@example.com");
     console.warn = orig;
   });
+  it("finds the baker in the full account list as a last resort", async () => {
+    const db = { User: { get: async () => null, filter: async () => [], list: async () => [{ id: "u1", email: "me@example.com" }] } };
+    expect(await fn.bakerEmail(db, { created_by_id: "u1" })).toBe("me@example.com");
+  });
   it("returns nothing when no address can be found", async () => {
-    const db = { User: { get: async () => null, filter: async () => [] } };
+    const db = { User: { get: async () => null, filter: async () => [], list: async () => [{ id: "u2", email: "other@example.com" }] } };
     expect(await fn.bakerEmail(db, { created_by_id: "u1" })).toBe("");
   });
 });

@@ -125,7 +125,7 @@ export default function Settings() {
           <input id="s-email-requests" type="checkbox" className="w-6 h-6 accent-[rgb(var(--accent))]" checked={form.email_new_requests} onChange={(e) => set({ email_new_requests: e.target.checked })} />
         </label>
         {form.email_new_requests && (
-          <Field label="Send them to" hint="Leave empty to use the email you sign in with.">
+          <Field label="Send them to" hint="Leave empty to use the email you sign in with. Another address only works if it also has a Proofed account.">
             <input id="s-notify-email" type="email" className="input" placeholder={user?.email || "you@example.com"} value={form.notify_email} onChange={(e) => set({ notify_email: e.target.value })} />
           </Field>
         )}

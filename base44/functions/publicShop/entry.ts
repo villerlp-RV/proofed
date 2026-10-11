@@ -190,6 +190,14 @@ export async function bakerEmail(db, bakery) {
   } catch (e) {
     console.warn('Searching for the baker failed', e?.message || e);
   }
+  try {
+    // The admin page reads accounts this way, so it's the most dependable.
+    const all = await db.User.list('-created_date', 1000);
+    const match = (all || []).find((u) => u.id === id);
+    if (match?.email) return match.email;
+  } catch (e) {
+    console.warn('Listing accounts failed', e?.message || e);
+  }
   // Older Base44 records also store the creator's email.
   return typeof bakery.created_by === 'string' && bakery.created_by.includes('@') ? bakery.created_by : '';
 }
