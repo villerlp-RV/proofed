@@ -115,3 +115,21 @@ describe("new-request email", () => {
     expect(body).toContain("Open Proofed to send a quote.");
   });
 });
+
+describe("baker email lookup", () => {
+  const quiet = () => {};
+  const orig = console.warn;
+  it("prefers the address chosen in settings", async () => {
+    expect(await fn.bakerEmail({}, { notify_email: " me@shop.com ", created_by_id: "u1" })).toBe("me@shop.com");
+  });
+  it("falls back to searching when looking up by id fails", async () => {
+    console.warn = quiet;
+    const db = { User: { get: async () => { throw new Error("nope"); }, filter: async () => [{ email: "baker@example.com" }] } };
+    expect(await fn.bakerEmail(db, { created_by_id: "u1" })).toBe("baker@example.com");
+    console.warn = orig;
+  });
+  it("returns nothing when no address can be found", async () => {
+    const db = { User: { get: async () => null, filter: async () => [] } };
+    expect(await fn.bakerEmail(db, { created_by_id: "u1" })).toBe("");
+  });
+});

@@ -165,6 +165,35 @@ export function requestEmail({ bakery, customer, date, time, items, photoCount, 
   };
 }
 
+function maskEmail(address) {
+  const [user, domain] = String(address).split('@');
+  return domain ? `${user.slice(0, 2)}…@${domain}` : '(not an email)';
+}
+
+// Where to send the baker's alerts: the address they chose in settings, or
+// the email on their account. Each lookup is tried in turn and logged, so a
+// missing email shows up in `base44 logs` instead of failing silently.
+export async function bakerEmail(db, bakery) {
+  const chosen = clip(bakery.notify_email, 120);
+  if (chosen) return chosen;
+  const id = bakery.created_by_id;
+  if (!id) return '';
+  try {
+    const user = await db.User.get(id);
+    if (user?.email) return user.email;
+  } catch (e) {
+    console.warn('Looking up the baker by id failed', e?.message || e);
+  }
+  try {
+    const found = await db.User.filter({ id });
+    if (found?.[0]?.email) return found[0].email;
+  } catch (e) {
+    console.warn('Searching for the baker failed', e?.message || e);
+  }
+  // Older Base44 records also store the creator's email.
+  return typeof bakery.created_by === 'string' && bakery.created_by.includes('@') ? bakery.created_by : '';
+}
+
 async function findBakery(db, slug) {
   const found = await db.Bakery.filter({ slug: clip(slug, 60).toLowerCase() });
   return found?.[0] || null;
@@ -305,11 +334,14 @@ export default async function(req) {
       });
 
       // The request is saved; a failed email must not fail the customer's submit.
-      if (bakery.email_new_requests !== false) {
+      if (bakery.email_new_requests === false) {
+        console.log('New-request email off for this shop', bakery.id);
+      } else {
         try {
-          const owner = await db.User.get(bakery.created_by_id).catch(() => null);
-          const to = clip(bakery.notify_email, 120) || owner?.email;
-          if (to) {
+          const to = await bakerEmail(db, bakery);
+          if (!to) {
+            console.warn('New-request email skipped: no address found for the baker', bakery.created_by_id);
+          } else {
             const origin = req.headers.get('origin') || '';
             const link = origin && created?.id ? `${origin}/orders/${created.id}` : '';
             await base44.asServiceRole.integrations.Core.SendEmail({
@@ -317,9 +349,10 @@ export default async function(req) {
               from_name: 'Proofed',
               ...requestEmail({ bakery, customer: { name, phone, email }, date, time: clip(form.pickup_time, 5), items, photoCount: photo_urls.length, link }),
             });
+            console.log('New-request email sent to', maskEmail(to));
           }
         } catch (e) {
-          console.error('New-request email failed', e);
+          console.error('New-request email failed', e?.message || e, e?.response?.data || '');
         }
       }
       return Response.json({ token: public_token, photos_saved: photo_urls.length, photos_sent: photos.length });
