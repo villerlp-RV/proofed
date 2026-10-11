@@ -44,6 +44,11 @@ export default function Today() {
   const { byWeek } = usage(list, now);
   const thisWeek = weekStart(today);
   const nextWeek = addDays(thisWeek, 7);
+  // Later weeks only show up once something is booked or quoted in them.
+  const laterWeeks = Object.keys(byWeek)
+    .filter((w) => w > nextWeek && byWeek[w] > 0)
+    .sort()
+    .slice(0, 6);
   const newCount = list.filter((o) => o.status === "requested").length;
   const saysPaid = list.filter((o) => effectiveStatus(o, now) === "quoted" && o.customer_says_paid);
   const coming = list
@@ -70,6 +75,15 @@ export default function Today() {
       ))}
       <WeekMeter label="This week" start={thisWeek} used={byWeek[thisWeek] || 0} limit={bakery.weekly_capacity} />
       <WeekMeter label="Next week" start={nextWeek} used={byWeek[nextWeek] || 0} limit={bakery.weekly_capacity} />
+      {laterWeeks.map((w) => (
+        <WeekMeter
+          key={w}
+          label={`In ${Math.round((new Date(w) - new Date(thisWeek)) / (7 * 86400000))} weeks`}
+          start={w}
+          used={byWeek[w]}
+          limit={bakery.weekly_capacity}
+        />
+      ))}
       <span className="lbl mt-2">Coming up</span>
       {coming.length === 0 ? (
         <Empty title="Nothing booked yet">
